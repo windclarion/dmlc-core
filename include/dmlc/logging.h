@@ -52,7 +52,7 @@ inline bool TagIsInHtkLogFilter(const char* file_path) {
 }
 #endif
 
-#define HLOG(level)  dmlc::LogMessage(__FILE__, __LINE__, level).stream()
+#define HLOG(level)  dmlc::LogMessage(__FILE__, __LINE__, __func__, level).stream()
 #define HCLOG(level) HLOG(level)
 
 #define HLOG_WITH_LEVEL(level) HtkLogLevel() > (level) ? (void)0 : dmlc::LogMessageVoidify() & HLOG(level)
@@ -310,7 +310,7 @@ DEFINE_CHECK_FUNC(_NE, !=)
 #if DMLC_LOG_CUSTOMIZE
 #define LOG_INFO dmlc::CustomLogMessage(__FILE__, __LINE__)
 #else
-#define LOG_INFO dmlc::LogMessage(__FILE__, __LINE__, HTK_LOG_LEVEL_INFO)
+#define LOG_INFO dmlc::LogMessage(__FILE__, __LINE__, __func__, HTK_LOG_LEVEL_INFO)
 #endif
 #define LOG_ERROR LOG_INFO
 #define LOG_WARNING LOG_INFO
@@ -382,7 +382,7 @@ class DateLogger {
 #ifndef _LIBCPP_SGX_NO_IOSTREAMS
 class LogMessage {
  public:
-  LogMessage(const char* file, int line, int level)
+  LogMessage(const char* file, int line, const char* func, int level)
       :
 #ifdef __ANDROID__
         log_stream_(std::cout)
@@ -393,6 +393,7 @@ class LogMessage {
     log_stream_ << pretty_date_.HumanDate() << " "
                 << HtkLogLevelToChar(level) << " "
                 << file << " "
+                << func << " "
                 << line << ": ";
   }
   ~LogMessage() { log_stream_ << '\n'; }
