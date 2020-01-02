@@ -360,14 +360,19 @@ class DateLogger {
 #else
     time_t time_value = time(NULL);
     struct tm *pnow;
+    int millisec = 0;
 #if !defined(_WIN32)
     struct tm now;
+    timespec ts;
     pnow = localtime_r(&time_value, &now);
+    if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+      millisec = ts.tv_nsec / 1000000;
+    }
 #else
     pnow = localtime(&time_value);  // NOLINT(*)
 #endif
-    snprintf(buffer_, sizeof(buffer_), "%02d:%02d:%02d",
-             pnow->tm_hour, pnow->tm_min, pnow->tm_sec);
+    snprintf(buffer_, sizeof(buffer_), "%02d:%02d:%02d:%03d",
+             pnow->tm_hour, pnow->tm_min, pnow->tm_sec, millisec);
 #endif
     return buffer_;
 #else
@@ -376,7 +381,7 @@ class DateLogger {
   }
 
  private:
-  char buffer_[9];
+  char buffer_[16];
 };
 
 #ifndef _LIBCPP_SGX_NO_IOSTREAMS
