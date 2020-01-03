@@ -21,6 +21,13 @@
 #include DMLC_EXECINFO_H
 #endif
 
+#if defined(_WIN32) && !defined(__GNUC__)
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+#include <thread>
+
 // the value is same with android/log.h
 #define HTK_LOG_LEVEL_VERBOSE      2
 #define HTK_LOG_LEVEL_DEBUG        3
@@ -395,7 +402,14 @@ class LogMessage {
         log_stream_(std::cerr)
 #endif
   {
+#if defined(_WIN32) && !defined(__GNUC__)
+    DWORD pid = GetCurrentProcessId();
+#else
+    int pid = getpid();
+#endif
+    std::thread::id tid = std::this_thread::get_id();
     log_stream_ << pretty_date_.HumanDate() << " "
+                << pid << " " << tid << " "
                 << HtkLogLevelToChar(level) << " "
                 << file << " "
                 << func << " "
