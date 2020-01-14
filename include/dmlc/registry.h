@@ -85,6 +85,7 @@ class Registry {
     fmap_[name] = e;
     const_list_.push_back(e);
     entry_list_.push_back(e);
+    HLOGV << "name=" << name;
     return *e;
   }
   /*!

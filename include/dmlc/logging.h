@@ -20,6 +20,8 @@
 #include <cxxabi.h>
 #include <sstream>
 #include DMLC_EXECINFO_H
+#else
+#warning "DMLC_LOG_STACK_TRACE disable!"
 #endif
 
 #if defined(_WIN32) && !defined(__GNUC__)
