@@ -28,6 +28,10 @@
 #endif
 #include <thread>
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
+
 // the value is same with android/log.h
 #define HTK_LOG_LEVEL_VERBOSE      2
 #define HTK_LOG_LEVEL_DEBUG        3
@@ -395,12 +399,6 @@ class DateLogger {
 class LogMessage {
  public:
   LogMessage(const char* file, int line, const char* func, void* me, int level)
-      :
-#ifdef __ANDROID__
-        log_stream_(std::cout)
-#else
-        log_stream_(std::cerr)
-#endif
   {
 #if defined(_WIN32) && !defined(__GNUC__)
     DWORD pid = GetCurrentProcessId();
@@ -416,11 +414,17 @@ class LogMessage {
                 << line << " ";
     if (me) log_stream_ << me << " ";
   }
-  ~LogMessage() { log_stream_ << '\n'; }
-  std::ostream& stream() { return log_stream_; }
+  ~LogMessage() { log_stream_ << '\n';
+#ifdef __ANDROID__
+  __android_log_write(HtkLogLevel(), "TVM", log_stream_.str().c_str());
+#else
+  std::cerr << log_stream_.str();
+#endif
+  }
+  std::ostringstream& stream() { return log_stream_; }
 
  protected:
-  std::ostream& log_stream_;
+  std::ostringstream log_stream_;
 
  private:
   DateLogger pretty_date_;
