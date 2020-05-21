@@ -9,6 +9,7 @@
 #define DMLC_LOGGING_H_
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -400,6 +401,9 @@ class LogMessage {
  public:
   LogMessage(const char* file, int line, const char* func, void* me, int level)
   {
+    ptrdiff_t prefix_len = 0;
+    const char* pos = std::strstr(file, "/tvm/");
+    if (pos) prefix_len = pos - file + 5;
 #if defined(_WIN32) && !defined(__GNUC__)
     DWORD pid = GetCurrentProcessId();
 #else
@@ -409,7 +413,7 @@ class LogMessage {
     log_stream_ << pretty_date_.HumanDate() << " "
                 << pid << " " << tid << " "
                 << HtkLogLevelToChar(level) << " "
-                << file << " "
+                << &file[prefix_len] << " "
                 << func << " "
                 << line << " ";
     if (me) log_stream_ << me << " ";
