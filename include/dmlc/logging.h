@@ -43,6 +43,8 @@
 #define HTK_LOG_LEVEL_ERROR        6
 #define HTK_LOG_LEVEL_FATAL        7
 
+#define HTK_LOG 1
+
 static inline char HtkLogLevelToChar(int level) {
   switch (level) {
     case HTK_LOG_LEVEL_VERBOSE: return 'V';
