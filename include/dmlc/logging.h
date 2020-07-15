@@ -330,7 +330,8 @@ class LogMessage {
         log_stream_(std::cerr)
 #endif
   {
-    log_stream_ << "[" << pretty_date_.HumanDate() << "] " << file << ":"
+    log_stream_ << pretty_date_.HumanDate() << " "
+                << file << " "
                 << line << ": ";
   }
   ~LogMessage() { log_stream_ << '\n'; }
