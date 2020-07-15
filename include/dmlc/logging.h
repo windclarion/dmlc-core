@@ -21,6 +21,55 @@
 #include DMLC_EXECINFO_H
 #endif
 
+// the value is same with android/log.h
+#define HTK_LOG_LEVEL_VERBOSE      2
+#define HTK_LOG_LEVEL_DEBUG        3
+#define HTK_LOG_LEVEL_INFO         4
+#define HTK_LOG_LEVEL_WARNING      5
+#define HTK_LOG_LEVEL_ERROR        6
+#define HTK_LOG_LEVEL_FATAL        7
+
+#if HTK_LOG
+int HtkLogLevel();
+bool TagIsInHtkLogFilter(const char* file_path);
+#else
+inline int HtkLogLevel() {
+  return HTK_LOG_LEVEL_DEBUG;
+}
+inline bool TagIsInHtkLogFilter(const char* file_path) {
+  return true;
+}
+#endif
+
+#define HLOG  dmlc::LogMessage(__FILE__, __LINE__).stream()
+#define HCLOG HLOG
+
+#define HLOG_WITH_LEVEL(level) HtkLogLevel() > (level) ? (void)0 : dmlc::LogMessageVoidify() & HLOG
+#define HFLOG_WITH_LEVEL(level) ((HtkLogLevel() > (level))|| !TagIsInHtkLogFilter(__FILE__)) ? (void)0 : dmlc::LogMessageVoidify() & HLOG
+#define HCLOG_WITH_LEVEL(level) HtkLogLevel() > (level) ? (void)0 : dmlc::LogMessageVoidify() & HCLOG
+#define HFCLOG_WITH_LEVEL(level) ((HtkLogLevel() > (level))|| !TagIsInHtkLogFilter(__FILE__)) ? (void)0 : dmlc::LogMessageVoidify() & HCLOG
+
+#define HLOGV HLOG_WITH_LEVEL(HTK_LOG_LEVEL_VERBOSE)
+#define HLOGD HLOG_WITH_LEVEL(HTK_LOG_LEVEL_DEBUG)
+#define HLOGI HLOG_WITH_LEVEL(HTK_LOG_LEVEL_INFO)
+#define HLOGW HLOG_WITH_LEVEL(HTK_LOG_LEVEL_WARNING)
+#define HLOGE HLOG_WITH_LEVEL(HTK_LOG_LEVEL_ERROR)
+#define HLOGF dmlc::LogMessageVoidify() & LOG_FATAL.stream()
+
+#define HCLOGV HCLOG_WITH_LEVEL(HTK_LOG_LEVEL_VERBOSE)
+#define HCLOGD HCLOG_WITH_LEVEL(HTK_LOG_LEVEL_DEBUG)
+#define HCLOGI HCLOG_WITH_LEVEL(HTK_LOG_LEVEL_INFO)
+#define HCLOGW HCLOG_WITH_LEVEL(HTK_LOG_LEVEL_WARNING)
+#define HCLOGE HCLOG_WITH_LEVEL(HTK_LOG_LEVEL_ERROR)
+
+#define HFLOGV HFLOG_WITH_LEVEL(HTK_LOG_LEVEL_VERBOSE)
+#define HFLOGD HFLOG_WITH_LEVEL(HTK_LOG_LEVEL_DEBUG)
+#define HFLOGI HFLOG_WITH_LEVEL(HTK_LOG_LEVEL_INFO)
+
+#define HFCLOGV HFCLOG_WITH_LEVEL(HTK_LOG_LEVEL_VERBOSE)
+#define HFCLOGD HFCLOG_WITH_LEVEL(HTK_LOG_LEVEL_DEBUG)
+#define HFCLOGI HFCLOG_WITH_LEVEL(HTK_LOG_LEVEL_INFO)
+
 namespace dmlc {
 /*!
  * \brief exception class that will be thrown by
