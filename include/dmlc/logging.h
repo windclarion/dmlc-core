@@ -29,6 +29,17 @@
 #define HTK_LOG_LEVEL_ERROR        6
 #define HTK_LOG_LEVEL_FATAL        7
 
+static inline char HtkLogLevelToChar(int level) {
+  switch (level) {
+    case HTK_LOG_LEVEL_VERBOSE: return 'V';
+    case HTK_LOG_LEVEL_DEBUG: return 'D';
+    case HTK_LOG_LEVEL_INFO: return 'I';
+    case HTK_LOG_LEVEL_WARNING: return 'W';
+    case HTK_LOG_LEVEL_ERROR: return 'E';
+    default: return 'N';
+  }
+}
+
 #if HTK_LOG
 int HtkLogLevel();
 bool TagIsInHtkLogFilter(const char* file_path);
@@ -41,13 +52,13 @@ inline bool TagIsInHtkLogFilter(const char* file_path) {
 }
 #endif
 
-#define HLOG  dmlc::LogMessage(__FILE__, __LINE__).stream()
-#define HCLOG HLOG
+#define HLOG(level)  dmlc::LogMessage(__FILE__, __LINE__, level).stream()
+#define HCLOG(level) HLOG(level)
 
-#define HLOG_WITH_LEVEL(level) HtkLogLevel() > (level) ? (void)0 : dmlc::LogMessageVoidify() & HLOG
-#define HFLOG_WITH_LEVEL(level) ((HtkLogLevel() > (level))|| !TagIsInHtkLogFilter(__FILE__)) ? (void)0 : dmlc::LogMessageVoidify() & HLOG
-#define HCLOG_WITH_LEVEL(level) HtkLogLevel() > (level) ? (void)0 : dmlc::LogMessageVoidify() & HCLOG
-#define HFCLOG_WITH_LEVEL(level) ((HtkLogLevel() > (level))|| !TagIsInHtkLogFilter(__FILE__)) ? (void)0 : dmlc::LogMessageVoidify() & HCLOG
+#define HLOG_WITH_LEVEL(level) HtkLogLevel() > (level) ? (void)0 : dmlc::LogMessageVoidify() & HLOG(level)
+#define HFLOG_WITH_LEVEL(level) ((HtkLogLevel() > (level))|| !TagIsInHtkLogFilter(__FILE__)) ? (void)0 : dmlc::LogMessageVoidify() & HLOG(level)
+#define HCLOG_WITH_LEVEL(level) HtkLogLevel() > (level) ? (void)0 : dmlc::LogMessageVoidify() & HCLOG(level)
+#define HFCLOG_WITH_LEVEL(level) ((HtkLogLevel() > (level))|| !TagIsInHtkLogFilter(__FILE__)) ? (void)0 : dmlc::LogMessageVoidify() & HCLOG(level)
 
 #define HLOGV HLOG_WITH_LEVEL(HTK_LOG_LEVEL_VERBOSE)
 #define HLOGD HLOG_WITH_LEVEL(HTK_LOG_LEVEL_DEBUG)
@@ -299,7 +310,7 @@ DEFINE_CHECK_FUNC(_NE, !=)
 #if DMLC_LOG_CUSTOMIZE
 #define LOG_INFO dmlc::CustomLogMessage(__FILE__, __LINE__)
 #else
-#define LOG_INFO dmlc::LogMessage(__FILE__, __LINE__)
+#define LOG_INFO dmlc::LogMessage(__FILE__, __LINE__, HTK_LOG_LEVEL_INFO)
 #endif
 #define LOG_ERROR LOG_INFO
 #define LOG_WARNING LOG_INFO
@@ -371,7 +382,7 @@ class DateLogger {
 #ifndef _LIBCPP_SGX_NO_IOSTREAMS
 class LogMessage {
  public:
-  LogMessage(const char* file, int line)
+  LogMessage(const char* file, int line, int level)
       :
 #ifdef __ANDROID__
         log_stream_(std::cout)
@@ -380,6 +391,7 @@ class LogMessage {
 #endif
   {
     log_stream_ << pretty_date_.HumanDate() << " "
+                << HtkLogLevelToChar(level) << " "
                 << file << " "
                 << line << ": ";
   }
